@@ -1,117 +1,114 @@
-/* ----- NAVIGATION BAR FUNCTION ----- */
-function myMenuFunction(){
-  var menuBtn = document.getElementById("myNavMenu");
+$(document).ready(function() {
 
-  if(menuBtn.className === "nav-menu"){
-    menuBtn.className += " responsive";
-  } else {
-    menuBtn.className = "nav-menu";
-  }
-}
+  //sticky header
+    $(window).scroll(function() {
+      if ($(this).scrollTop() > 1) {
+        $(".header-area").addClass("sticky");
+      } else {
+        $(".header-area").removeClass("sticky");
+      }
+  
+      // Update the active section in the header
+      updateActiveSection();
+    });
+  
+    $(".header ul li a").click(function(e) {
+      e.preventDefault(); 
+  
+      var target = $(this).attr("href");
+  
+      if ($(target).hasClass("active-section")) {
+        return; 
+      }
+  
+      if (target === "#home") {
+        $("html, body").animate(
+          {
+            scrollTop: 0 
+          },
+          500
+        );
+      } else {
+        var offset = $(target).offset().top - 40; 
+  
+        $("html, body").animate(
+          {
+            scrollTop: offset
+          },
+          500
+        );
+      }
+  
+      $(".header ul li a").removeClass("active");
+      $(this).addClass("active");
+    });
+  
 
-/* ----- ADD SHADOW ON NAVIGATION BAR WHILE SCROLLING ----- */
-window.onscroll = function() {headerShadow()};
-
-function headerShadow() {
-  const navHeader =document.getElementById("header");
-
-  if (document.body.scrollTop > 50 || document.documentElement.scrollTop >  50) {
-
-    navHeader.style.boxShadow = "0 1px 6px rgba(0, 0, 0, 0.1)";
-    navHeader.style.height = "70px";
-    navHeader.style.lineHeight = "70px";
-
-  } else {
-
-    navHeader.style.boxShadow = "none";
-    navHeader.style.height = "90px";
-    navHeader.style.lineHeight = "90px";
-
-  }
-}
-
-
-/* ----- TYPING EFFECT ----- */
-var typingEffect = new Typed(".typedText",{
-  strings : ["Student","Fresher","Developer"],
-  loop : true,
-  typeSpeed : 100, 
-  backSpeed : 80,
-  backDelay : 2000
-})
-
-
-/* ----- ## -- SCROLL REVEAL ANIMATION -- ## ----- */
-const sr = ScrollReveal({
-      origin: 'top',
-      distance: '80px',
+    //Initial content revealing js
+    ScrollReveal({
+      distance: "100px",
       duration: 2000,
-      reset: true     
-})
+      delay: 200
+    });
+  
+    ScrollReveal().reveal(".header a, .profile-photo, .about-content, .education", {
+      origin: "left"
+    });
+    ScrollReveal().reveal(".header ul, .profile-text, .about-skills, .internship", {
+      origin: "right"
+    });
+    ScrollReveal().reveal(".project-title, .contact-title", {
+      origin: "top"
+    });
+    ScrollReveal().reveal(".projects, .contact", {
+      origin: "bottom"
+    });
 
-/* -- HOME -- */
-sr.reveal('.featured-text-card',{})
-sr.reveal('.featured-name',{delay: 100})
-sr.reveal('.featured-text-info',{delay: 200})
-sr.reveal('.featured-text-btn',{delay: 200})
-sr.reveal('.social_icons',{delay: 200})
-sr.reveal('.featured-image',{delay: 300})
+  //contact form to excel sheet
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbzUSaaX3XmlE5m9YLOHOBrRuCh2Ohv49N9bs4bew7xPd1qlgpvXtnudDs5Xhp3jF-Fx/exec';
+  const form = document.forms['submitToGoogleSheet']
+  const msg = document.getElementById("msg")
 
-
-/* -- PROJECT BOX -- */
-sr.reveal('.project-box',{interval: 200})
-
-/* -- HEADINGS -- */
-sr.reveal('.top-header',{})
-
-/* ----- ## -- SCROLL REVEAL LEFT_RIGHT ANIMATION -- ## ----- */
-
-/* -- ABOUT INFO & CONTACT INFO -- */
-const srLeft = ScrollReveal({
-origin: 'left',
-distance: '80px',
-duration: 2000,
-reset: true
-})
-
-srLeft.reveal('.about-info',{delay: 100})
-srLeft.reveal('.contact-info',{delay: 100})
-
-/* -- ABOUT SKILLS & FORM BOX -- */
-const srRight = ScrollReveal({
-origin: 'right',
-distance: '80px',
-duration: 2000,
-reset: true
-})
-
-srRight.reveal('.skills-box',{delay: 100})
-srRight.reveal('.form-control',{delay: 100})
-
-
-
-/* ----- CHANGE ACTIVE LINK ----- */
-
-const sections = document.querySelectorAll('section[id]')
-
-function scrollActive() {
-const scrollY = window.scrollY;
-
-sections.forEach(current =>{
-  const sectionHeight = current.offsetHeight,
-      sectionTop = current.offsetTop - 50,
-    sectionId = current.getAttribute('id')
-
-  if(scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) { 
-
-      document.querySelector('.nav-menu a[href*=' + sectionId + ']').classList.add('active-link')
-
-  }  else {
-
-    document.querySelector('.nav-menu a[href*=' + sectionId + ']').classList.remove('active-link')
-
+  form.addEventListener('submit', e => {
+      e.preventDefault()
+      fetch(scriptURL, { method: 'POST', body: new FormData(form) })
+          .then(response => {
+              msg.innerHTML = "Message sent successfully"
+              setTimeout(function () {
+                  msg.innerHTML = ""
+              }, 5000)
+              form.reset()
+          })
+          .catch(error => console.error('Error!', error.message))
+  })
+    
+  });
+  
+  function updateActiveSection() {
+    var scrollPosition = $(window).scrollTop();
+  
+    // Checking if scroll position is at the top of the page
+    if (scrollPosition === 0) {
+      $(".header ul li a").removeClass("active");
+      $(".header ul li a[href='#home']").addClass("active");
+      return;
+    }
+  
+    // Iterate through each section and update the active class in the header
+    $("section").each(function() {
+      var target = $(this).attr("id");
+      var offset = $(this).offset().top;
+      var height = $(this).outerHeight();
+  
+      if (
+        scrollPosition >= offset - 40 &&
+        scrollPosition < offset + height - 40
+      ) {
+        $(".header ul li a").removeClass("active");
+        $(".header ul li a[href='#" + target + "']").addClass("active");
+      }
+    });
   }
-})
-}
+  
 
-window.addEventListener('scroll', scrollActive)
+ 
